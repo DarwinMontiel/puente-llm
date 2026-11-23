@@ -5,7 +5,7 @@ import json
 import httpx
 import pytest
 
-from puente_llm import AuthenticationError, Message, RateLimitedError
+from puente_llm import AuthenticationError, Message, ProviderError, RateLimitedError
 from puente_llm.providers.groq import GroqProvider, iter_sse_text
 
 
@@ -78,6 +78,24 @@ def test_sse_parser_ignores_comments_and_stops_at_done() -> None:
         "data: x",
     ]
     assert list(iter_sse_text(lines)) == ["a"]
+
+
+def test_sse_parser_skips_events_without_choices() -> None:
+    lines = [
+        'data: {"choices":[{"delta":{"content":"a"}}]}',
+        'data: {"choices":[],"usage":{"completion_tokens":1}}',
+        "data: [DONE]",
+    ]
+    assert list(iter_sse_text(lines)) == ["a"]
+
+
+def test_sse_error_event_raises_provider_error() -> None:
+    lines = [
+        'data: {"choices":[{"delta":{"content":"a"}}]}',
+        'data: {"error":{"message":"service unavailable","type":"internal_server_error"}}',
+    ]
+    with pytest.raises(ProviderError, match=r"\[groq\] service unavailable"):
+        list(iter_sse_text(lines))
 
 
 @pytest.mark.parametrize(("status", "error"), [(401, AuthenticationError), (429, RateLimitedError)])

@@ -9,7 +9,7 @@ from typing import Any, Self
 
 import httpx
 
-from puente_llm.errors import AuthenticationError
+from puente_llm.errors import AuthenticationError, ProviderError
 from puente_llm.providers.base import raise_for_status, translate_transport_errors
 from puente_llm.types import Completion, Message
 
@@ -23,7 +23,15 @@ def iter_sse_text(lines: Iterable[str]) -> Iterator[str]:
         if data == "[DONE]":
             return
         chunk: dict[str, Any] = json.loads(data)
-        delta = chunk["choices"][0].get("delta", {})
+        if "error" in chunk:
+            # Un error a mitad del stream llega como evento SSE, no como código HTTP.
+            error = chunk["error"]
+            message = error.get("message", error) if isinstance(error, dict) else error
+            raise ProviderError("groq", str(message))
+        choices = chunk.get("choices") or []
+        if not choices:  # p. ej. el último evento solo con ``usage``
+            continue
+        delta = choices[0].get("delta") or {}
         if text := delta.get("content"):
             yield text
 

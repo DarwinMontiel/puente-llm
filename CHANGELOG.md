@@ -3,6 +3,13 @@
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el proyecto usa
 [versionado semántico](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### Corregido
+- Un evento de error de Groq a mitad del stream (`data: {"error": ...}`) se reporta como
+  `ProviderError` en lugar de un `KeyError`; los eventos sin `choices` se ignoran.
+- El ejemplo de línea de comandos del README tenía un `\n` literal en lugar de un salto de línea.
+
 ## [2.0.0] - 2026-11-12
 
 ### Cambiado (incompatible)

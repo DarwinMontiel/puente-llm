@@ -34,7 +34,8 @@ cliente reintenta, y si el modelo local sigue sin responder, pasa a la nube y de
 (salida ilustrativa; los avisos tienen el formato real del log):
 
 ```text
-$ puente -v pregunta "El cliente promete pagar el viernes 15" \n    --sistema "Clasifica la nota. Responde solo con una etiqueta: promesa_de_pago, reclamo, renuencia..."
+$ puente -v pregunta "El cliente promete pagar el viernes 15" \
+    --sistema "Clasifica la nota. Responde solo con una etiqueta: promesa_de_pago, reclamo, renuencia..."
   · [ollama] no se pudo conectar (ConnectError); intento 2 de 2 en 0.5 s
   · [ollama] no se pudo conectar (ConnectError); paso a groq
 promesa_de_pago
